@@ -1,0 +1,45 @@
+import tensorflow as tf # tensorflow를 tf로 import
+import numpy as np # numpy를 np로 import
+
+data = np.array([
+    # X1,   X2,    X3,   y
+    [ 73.,  80.,  75., 152. ],
+    [ 93.,  88.,  93., 185. ],
+    [ 89.,  91.,  90., 180. ],
+    [ 96.,  98., 100., 196. ],
+    [ 73.,  66.,  70., 142. ]
+], dtype=np.float32)
+
+# x,y는 slice data, x는 5행 3열 data, y는 5행 1열 data
+X = data[:, :-1] # input
+y = data[:, [-1]] # output
+
+# W는 x에 의해 정의
+W = tf.Variable(tf.random_normal([3, 1])) # W의 raw=3, W의 colum(출력값)=1 즉, 3by1 Matrix
+b = tf.Variable(tf.random_normal([1])) # 
+
+# learning_rate값 지정
+learning_rate = 0.000001
+
+# predict 함수는 X, W로 지정 
+def predict(X):
+    return tf.matmul(X, W) + b
+
+print("epoch | cost")
+
+# for문을 이용해 2001번 반복해 W,b값을 업데이트, 100배수에 1번씩 
+n_epochs = 2000 # epochs 는 얼마나 돌건지
+for i in range(n_epochs+1):
+    # tf.GradientTape() to record the gradient of the cost function
+    with tf.GradientTape() as tape:
+        cost = tf.reduce_mean((tf.square(predict(X) - y)))
+
+    # calculates the gradients of the loss
+    W_grad, b_grad = tape.gradient(cost, [W, b])
+
+    # updates parameters (W and b)
+    W.assign_sub(learning_rate * W_grad)
+    b.assign_sub(learning_rate * b_grad)
+    
+    if i % 100 == 0:
+        print("{:5} | {:10.4f}".format(i, cost.numpy()))
